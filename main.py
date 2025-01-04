@@ -9,7 +9,7 @@ from langchain.agents.output_parsers import ReActSingleInputOutputParser
 from langchain.prompts import PromptTemplate
 from langchain.tools.render import render_text_description
 from langchain_openai import ChatOpenAI
-
+from callbacks import AgentCallbackHandler
 load_dotenv()
 
 
@@ -61,7 +61,7 @@ if __name__ == "__main__":
         tool_names=", ".join([t.name for t in tools]),
     )
 
-    llm = ChatOpenAI(temperature=0, stop=["\nObservation"])
+    llm = ChatOpenAI(temperature=0, stop=["\nObservation"], callbacks=[AgentCallbackHandler()])
     intermediate_steps = []
 
     agent = (
@@ -79,6 +79,9 @@ if __name__ == "__main__":
 
     while not isinstance(agent_step, AgentFinish):
         i += 1
+        print(f"Loop {i}")
+        print(f"before: {agent_step=}")
+
         
         agent_step: Union[AgentAction, AgentFinish] = agent.invoke(
             {
@@ -87,8 +90,8 @@ if __name__ == "__main__":
             }
         )
 
-        print(f"Loop {i}")
-        print(f"{agent_step=}")
+
+        print(f"after: {agent_step=}")
 
         if isinstance(agent_step, AgentAction):
             tool_name = agent_step.tool
